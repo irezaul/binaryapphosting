@@ -261,6 +261,59 @@ wget -qO- icanhazip.com
 
 ### Important Section - create script for vpn start & stop service
 
+> Create `inet dhcp` on this command -
+```bash
+sudo nano /etc/network/interfaces
+```
+> copy this code & paste on editor....
+```editor
+#interfaces file used by ifup(8) and ifdown(8)
+
+auto lo
+iface lo inet loopback
+
+auto-hotplug vpn_nic
+iface vpn_nic inet dhcp
+```
+> Now create `vpnStart` bash file
+
+```bash
+sudo nano /usr/bin/vpnstart.sh
+```
+> type this `script`
+```editor
+#! /bin/bash
+
+/usr/bin/vpnclient
+sleep 5
+ip route add 139.59.9.243/32 via 192.168.1.1 dev ens33
+ip route del default via 192.168.1.1 dev ens33
+ip route add default via 10.211.254.254 dev vpn_nic
+
+exit 0
+```
+> Now create `vpnStop` bash file
+
+```bash
+sudo nano /usr/bin/vpnstop.sh
+```
+> type this `script`
+```editor
+#! /bin/bash
+
+ifdown vpn_nic
+/usr/bin/vpnclient stop
+sleep 5
+
+ip route del 139.59.9.243/32
+ip route del default
+ip route add default via 192.168.1.1 dev ens33
+
+exit 0
+```
+#### Now reboot your pc JOb done !
+
+
 
 ## Resource
 * [vpn-server-on-ubuntu-20-04](https://cloudinfrastructureservices.co.uk/how-to-install-softether-vpn-server-on-ubuntu-20-04)
